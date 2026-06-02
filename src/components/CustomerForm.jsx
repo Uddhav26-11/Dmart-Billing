@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { useBilling } from "../context/BillingContext";
 
 export default function CustomerForm() {
@@ -8,11 +9,12 @@ export default function CustomerForm() {
 
   const handleSubmit = () => {
     if (!name || !gender) {
-      alert("Please enter name and gender!");
+      toast.error("Please enter name and gender!");
       return;
     }
+
     updateCustomer({ name, gender });
-    alert("Customer details saved!");
+    toast.success("Customer details saved!");
   };
 
   return (
@@ -21,11 +23,11 @@ export default function CustomerForm() {
         👤 Customer Details
       </h2>
 
-      {/* Name Input */}
       <div className="mb-4">
         <label className="block text-gray-700 font-semibold mb-1">
           Customer Name
         </label>
+
         <input
           type="text"
           placeholder="Enter name..."
@@ -35,11 +37,11 @@ export default function CustomerForm() {
         />
       </div>
 
-      {/* Gender Select */}
       <div className="mb-4">
         <label className="block text-gray-700 font-semibold mb-1">
           Gender
         </label>
+
         <select
           value={gender}
           onChange={(e) => setGender(e.target.value)}
@@ -51,7 +53,6 @@ export default function CustomerForm() {
         </select>
       </div>
 
-      {/* Submit Button */}
       <button
         onClick={handleSubmit}
         className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"

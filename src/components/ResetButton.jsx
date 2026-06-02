@@ -1,11 +1,37 @@
+import toast from "react-hot-toast";
 import { useBilling } from "../context/BillingContext";
 
 export default function ResetButton() {
   const { resetBilling } = useBilling();
 
   const handleReset = () => {
-    const confirm = window.confirm("Are you sure? Sab data clear ho jayega!");
-    if (confirm) resetBilling();
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <p className="font-medium">
+          Are you sure? Sab data clear ho jayega!
+        </p>
+
+        <div className="flex gap-2">
+          <button
+            className="bg-red-500 text-white px-3 py-1 rounded"
+            onClick={() => {
+              resetBilling();
+              toast.dismiss(t.id);
+              toast.success("Bill Reset Successfully");
+            }}
+          >
+            Yes
+          </button>
+
+          <button
+            className="bg-gray-500 text-white px-3 py-1 rounded"
+            onClick={() => toast.dismiss(t.id)}
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ));
   };
 
   return (
