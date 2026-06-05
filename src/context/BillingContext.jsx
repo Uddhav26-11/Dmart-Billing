@@ -81,7 +81,7 @@ export function BillingProvider({ children }) {
       };
 
       const response = await fetch(
-        "http://localhost:5000/api/bills",
+        "https://dmart-billing-backend.vercel.app/api/bills",
         {
           method: "POST",
           headers: {
