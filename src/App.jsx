@@ -1,14 +1,15 @@
-import { Routes, Route, Link } from "react-router-dom";
-
+import { useState } from "react";
 import { BillingProvider } from "./context/BillingContext";
+
 import CustomerForm from "./components/CustomerForm";
 import ItemEntry from "./components/ItemEntry";
 import BillReceipt from "./components/BillReceipt";
 import ResetButton from "./components/ResetButton";
 
 import BillHistory from "./pages/BillHistory";
+import AdminLogin from "./pages/AdminLogin";
 
-function HomePage() {
+function BillingPage({ onViewHistory }) {
 return ( <BillingProvider> <div className="min-h-screen bg-gray-100 py-8 px-4">
 
 ```
@@ -21,12 +22,12 @@ return ( <BillingProvider> <div className="min-h-screen bg-gray-100 py-8 px-4">
         Fast & Easy Billing
       </p>
 
-      <Link
-        to="/history"
-        className="inline-block mt-4 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700"
+      <button
+        onClick={onViewHistory}
+        className="mt-4 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700"
       >
         📜 View Customer Bills History
-      </Link>
+      </button>
     </div>
 
     <div className="max-w-3xl mx-auto">
@@ -44,8 +45,46 @@ return ( <BillingProvider> <div className="min-h-screen bg-gray-100 py-8 px-4">
 }
 
 export default function App() {
-return ( <Routes>
-<Route path="/" element={<HomePage />} />
-<Route path="/history" element={<BillHistory />} /> </Routes>
+const [currentPage, setCurrentPage] = useState("home");
+const [isAdmin, setIsAdmin] = useState(false);
+
+if (currentPage === "login") {
+return (
+<AdminLogin
+onLogin={() => {
+setIsAdmin(true);
+setCurrentPage("history");
+}}
+/>
+);
+}
+
+if (currentPage === "history" && isAdmin) {
+return ( <div> <div className="bg-white shadow p-4 flex justify-between"> <h1 className="text-2xl font-bold text-blue-600">
+Admin Portal </h1>
+
+
+      <button
+        onClick={() => {
+          setIsAdmin(false);
+          setCurrentPage("home");
+        }}
+        className="bg-red-500 text-white px-4 py-2 rounded"
+      >
+        Logout
+      </button>
+    </div>
+
+    <BillHistory />
+  </div>
+);
+
+
+}
+
+return (
+<BillingPage
+onViewHistory={() => setCurrentPage("login")}
+/>
 );
 }
