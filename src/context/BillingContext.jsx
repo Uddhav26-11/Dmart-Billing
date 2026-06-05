@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
-
+import { calculateBill, ITEM_PRICES } from "../utils/calculations";
 
 const BillingContext = createContext();
-
 
 const initialState = {
   customer: { name: "", gender: "" },
@@ -23,43 +22,98 @@ const initialState = {
 };
 
 export function BillingProvider({ children }) {
-  // localStorage se data lo — agar hai toh, warna initialState lo
   const [state, setState] = useState(() => {
     const saved = localStorage.getItem("dmartBilling");
     return saved ? JSON.parse(saved) : initialState;
   });
 
-  // Har state change pe localStorage mein save karo
   useEffect(() => {
     localStorage.setItem("dmartBilling", JSON.stringify(state));
   }, [state]);
 
-  // Customer update karo
   const updateCustomer = (customer) => {
-    setState((prev) => ({ ...prev, customer }));
+    setState((prev) => ({
+      ...prev,
+      customer,
+    }));
   };
 
-  // Item ki quantity update karo
   const updateItemQuantity = (index, quantity) => {
     const newItems = [...state.items];
-    newItems[index] = { ...newItems[index], quantity: Number(quantity) };
-    setState((prev) => ({ ...prev, items: newItems }));
+
+    newItems[index] = {
+      ...newItems[index],
+      quantity: Number(quantity),
+    };
+
+    setState((prev) => ({
+      ...prev,
+      items: newItems,
+    }));
   };
 
-  // Carry bag update karo
   const updateCarryBag = (value) => {
-    setState((prev) => ({ ...prev, carryBag: value }));
+    setState((prev) => ({
+      ...prev,
+      carryBag: value,
+    }));
   };
 
-  // Bill generate karo
-  const generateBill = () => {
-    setState((prev) => ({ ...prev, billGenerated: true }));
+  const generateBill = async () => {
+    try {
+      const itemsToSave = state.items
+        .filter((item) => item.quantity > 0)
+        .map((item) => ({
+          productName: item.name,
+          quantity: item.quantity,
+          price: ITEM_PRICES[item.name],
+        }));
+
+      const bill = calculateBill(state.items);
+
+      const totalAmount =
+        bill.afterGST + (state.carryBag ? 10 : 0);
+
+      const billData = {
+        customerName: state.customer.name || "Customer",
+        items: itemsToSave,
+        totalAmount,
+      };
+
+      const response = await fetch(
+        "http://localhost:5000/api/bills",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(billData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to save bill");
+      }
+
+      const data = await response.json();
+
+      console.log("Bill Saved:", data);
+
+      setState((prev) => ({
+        ...prev,
+        billGenerated: true,
+      }));
+
+      alert("✅ Bill Saved Successfully!");
+    } catch (error) {
+      console.error("Error saving bill:", error);
+      alert("❌ Error Saving Bill");
+    }
   };
 
-  // Reset — sab clear karo
   const resetBilling = () => {
     setState(initialState);
-    localStorage.clear();
+    localStorage.removeItem("dmartBilling");
   };
 
   return (
@@ -78,7 +132,6 @@ export function BillingProvider({ children }) {
   );
 }
 
-// Custom hook — easy access ke liye
 export function useBilling() {
   return useContext(BillingContext);
 }

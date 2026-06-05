@@ -8,7 +8,7 @@ export default function ResetButton() {
     toast((t) => (
       <div className="flex flex-col gap-3">
         <p className="font-medium">
-          Are you sure? Sab data clear ho jayega!
+          Are you sure? 
         </p>
 
         <div className="flex gap-2">
